@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Nuevo Gasto</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-black min-h-screen flex items-center justify-center relative overflow-hidden">
+
+<!-- 🔵 PATRONES LATERALES -->
+<div class="absolute left-0 top-0 w-1/4 h-full bg-gradient-to-b from-blue-600 to-transparent opacity-20"></div>
+<div class="absolute right-0 top-0 w-1/4 h-full bg-gradient-to-t from-blue-600 to-transparent opacity-20"></div>
+
+<!-- CONTENEDOR -->
+<div class="relative bg-gray-900 p-8 rounded-2xl shadow-2xl w-full max-w-md border border-blue-500">
+
+    <h2 class="text-2xl font-bold mb-6 text-blue-400 text-center">
+        💸 Registrar Gasto
+    </h2>
+
+    <form action="/guardar" method="post" class="space-y-4">
+
+        <!-- DESCRIPCIÓN -->
+        <div>
+            <label class="block text-gray-300">Descripción</label>
+            <input type="text" name="descripcion"
+                   class="w-full p-2 bg-gray-800 border border-blue-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white"
+                   placeholder="Ej: Almuerzo"
+                   required>
+        </div>
+
+        <!-- MONTO -->
+        <div>
+            <label class="block text-gray-300">Monto</label>
+            <input type="number" step="0.01" name="monto"
+                   class="w-full p-2 bg-gray-800 border border-blue-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-white"
+                   placeholder="Ej: 20.50"
+                   required>
+        </div>
+
+        <!-- CATEGORIA -->
+        <div>
+            <label class="block text-gray-300">Categoría</label>
+            <select name="categoria.id"
+                    class="w-full p-2 bg-gray-800 border border-blue-500 rounded-lg text-white">
+                <option th:each="cat : ${categorias}"
+                        th:value="${cat.id}"
+                        th:text="${cat.nombre}">
+                </option>
+            </select>
+        </div>
+
+        <!-- BOTONES -->
+        <div class="flex justify-between items-center pt-4">
+            <a href="/"
+               class="text-gray-400 hover:text-blue-400 transition">
+                ← Volver
+            </a>
+
+            <button class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition shadow-lg">
+                Guardar
+            </button>
+        </div>
+
+    </form>
+
+</div>
+
+</body>
+</html>
