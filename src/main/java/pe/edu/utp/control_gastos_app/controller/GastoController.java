@@ -65,5 +65,33 @@ public class GastoController {
         return "historial";
     }
 
+    @GetMapping("/analisis")
+    public String analisis(Model model) {
+
+        Double total = gastoService.totalGastos();
+        Double mes = gastoService.gastosMes();
+        Double semana = gastoService.gastosSemana();
+
+        var categoriaTop = gastoService.categoriaMayorGasto();
+        var categorias = gastoService.gastosPorCategoria();
+
+        // Estado financiero (simple)
+        String estado = "Regular";
+        if (total < 100) estado = "Muy bien";
+        else if (total < 300) estado = "Bien";
+        else if (total < 600) estado = "Regular";
+        else if (total < 1000) estado = "Mal";
+        else estado = "Crítico";
+
+        model.addAttribute("total", total);
+        model.addAttribute("mes", mes);
+        model.addAttribute("semana", semana);
+        model.addAttribute("categoriaTop", categoriaTop);
+        model.addAttribute("categorias", categorias);
+        model.addAttribute("estado", estado);
+
+        return "analisis";
+    }
+
 
 }
