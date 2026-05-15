@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Nuevo movimiento</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div class="mb-8">
+        <h1 class="text-2xl font-bold">Nuevo movimiento</h1>
+        <p class="text-[#94a3b8] text-sm mt-1">Registra un ingreso o gasto</p>
+    </div>
+
+    <div class="max-w-lg bg-[#1e293b] rounded-2xl border border-[#334155] p-8">
+        <form th:action="@{/transactions/new}" method="post"
+              th:object="${transaction}" class="space-y-5">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+            <!-- Tipo -->
+            <div>
+                <label for="type" class="block text-sm text-[#94a3b8] mb-1">Tipo</label>
+                <select id="type" th:field="*{type}" required
+                        class="w-full px-4 py-2.5 rounded-lg bg-[#0f172a] border border-[#334155] text-[#e2e8f0]
+                               focus:outline-none focus:border-blue-500 transition-colors text-sm">
+                    <option value="" disabled>Selecciona un tipo</option>
+                    <option th:each="type : ${categoryTypes}"
+                            th:value="${type}"
+                            th:text="${type.name() == 'INCOME'} ? 'Ingreso' : 'Gasto'"></option>
+                </select>
+            </div>
+
+            <!-- Monto -->
+            <div>
+                <label for="amount" class="block text-sm text-[#94a3b8] mb-1">Monto</label>
+                <input type="number" id="amount" th:field="*{amount}" step="0.01" min="0.01" required
+                       class="w-full px-4 py-2.5 rounded-lg bg-[#0f172a] border border-[#334155] text-[#e2e8f0]
+                              placeholder-[#475569] focus:outline-none focus:border-blue-500 transition-colors text-sm"
+                       placeholder="0.00"/>
+            </div>
+
+            <!-- Descripción -->
+            <div>
+                <label for="description" class="block text-sm text-[#94a3b8] mb-1">
+                    Descripción <span class="text-[#475569]">(opcional)</span>
+                </label>
+                <input type="text" id="description" th:field="*{description}"
+                       class="w-full px-4 py-2.5 rounded-lg bg-[#0f172a] border border-[#334155] text-[#e2e8f0]
+                              placeholder-[#475569] focus:outline-none focus:border-blue-500 transition-colors text-sm"
+                       placeholder="Ej: Almuerzo, Pago de alquiler"/>
+            </div>
+
+            <!-- Cuenta -->
+            <div>
+                <label for="accountId" class="block text-sm text-[#94a3b8] mb-1">Cuenta</label>
+                <select id="accountId" name="accountId" required
+                        class="w-full px-4 py-2.5 rounded-lg bg-[#0f172a] border border-[#334155] text-[#e2e8f0]
+                               focus:outline-none focus:border-blue-500 transition-colors text-sm">
+                    <option value="" disabled selected>Selecciona una cuenta</option>
+                    <option th:each="acc : ${accounts}"
+                            th:value="${acc.id}"
+                            th:text="${acc.name + ' (S/ ' + #numbers.formatDecimal(acc.balance, 1, 2) + ')'}"></option>
+                </select>
+            </div>
+
+            <!-- Categoría -->
+            <div>
+                <label for="categoryId" class="block text-sm text-[#94a3b8] mb-1">Categoría</label>
+                <select id="categoryId" name="categoryId" required
+                        class="w-full px-4 py-2.5 rounded-lg bg-[#0f172a] border border-[#334155] text-[#e2e8f0]
+                               focus:outline-none focus:border-blue-500 transition-colors text-sm">
+                    <option value="" disabled selected>Selecciona una categoría</option>
+                    <option th:each="cat : ${categories}"
+                            th:value="${cat.id}"
+                            th:text="${cat.name}"></option>
+                </select>
+            </div>
+
+            <!-- Fecha -->
+            <div>
+                <label for="date" class="block text-sm text-[#94a3b8] mb-1">Fecha</label>
+                <input type="date" id="date" th:field="*{date}" required
+                       class="w-full px-4 py-2.5 rounded-lg bg-[#0f172a] border border-[#334155] text-[#e2e8f0]
+                              focus:outline-none focus:border-blue-500 transition-colors text-sm"/>
+            </div>
+
+            <!-- Botones -->
+            <div class="flex gap-3 pt-2">
+                <a th:href="@{/transactions}"
+                   class="flex-1 text-center px-4 py-2.5 rounded-lg border border-[#334155] text-[#94a3b8]
+                          hover:text-white hover:bg-[#334155] transition-colors text-sm font-semibold">
+                    Cancelar
+                </a>
+                <button type="submit"
+                        class="flex-1 px-4 py-2.5 rounded-lg bg-blue-700 hover:bg-blue-600 text-white
+                               font-semibold transition-colors text-sm">
+                    Registrar
+                </button>
+            </div>
+
+        </form>
+    </div>
+
+</div>
+</body>
+</html>

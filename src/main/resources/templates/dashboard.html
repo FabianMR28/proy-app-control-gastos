@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+
+<body>
+
+<div layout:fragment="content">
+
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-2xl font-bold">Dashboard</h1>
+        <p class="text-[#94a3b8] text-sm mt-1">
+            Resumen de tus finanzas del mes actual
+        </p>
+    </div>
+
+    <!-- RESUMEN -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+
+        <div class="bg-[#1e293b] rounded-2xl border border-[#334155] p-6">
+            <p class="text-[#94a3b8] text-sm mb-1">Balance total</p>
+            <p class="text-3xl font-bold text-white"
+               th:text="${'S/ ' + #numbers.formatDecimal(totalBalance, 1, 2)}">
+                S/ 0.00
+            </p>
+        </div>
+
+        <div class="bg-[#1e293b] rounded-2xl border border-[#334155] p-6">
+            <p class="text-[#94a3b8] text-sm mb-1">Ingresos</p>
+            <p class="text-3xl font-bold text-green-400"
+               th:text="${'S/ ' + #numbers.formatDecimal(totalIncome, 1, 2)}">
+                S/ 0.00
+            </p>
+        </div>
+
+        <div class="bg-[#1e293b] rounded-2xl border border-[#334155] p-6">
+            <p class="text-[#94a3b8] text-sm mb-1">Gastos</p>
+            <p class="text-3xl font-bold text-red-400"
+               th:text="${'S/ ' + #numbers.formatDecimal(totalExpense, 1, 2)}">
+                S/ 0.00
+            </p>
+        </div>
+
+    </div>
+
+    <!-- MOVIMIENTOS -->
+    <div class="bg-[#1e293b] rounded-2xl border border-[#334155] p-6">
+
+        <h2 class="font-semibold text-white mb-4">
+            Movimientos recientes
+        </h2>
+
+        <div th:if="${#lists.isEmpty(recentTransactions)}"
+             class="text-[#94a3b8] text-sm text-center py-6">
+            No hay movimientos
+        </div>
+
+        <div th:each="tx : ${recentTransactions}"
+             class="flex justify-between py-3 border-b border-[#334155] last:border-0">
+
+            <span class="text-white"
+                  th:text="${tx.description}">
+                Movimiento
+            </span>
+
+            <span th:classappend="${tx.type.name() == 'INCOME'} ? 'text-green-400' : 'text-red-400'"
+                  th:text="${tx.amount}">
+            </span>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
