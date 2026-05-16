@@ -1,79 +1,149 @@
 <!DOCTYPE html>
-<html lang="es"
-      xmlns:th="http://www.thymeleaf.org"
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layout}">
-
+<head>
+    <title>Dashboard</title>
+</head>
 <body>
-
 <div layout:fragment="content">
 
     <!-- Header -->
     <div class="mb-8">
         <h1 class="text-2xl font-bold">Dashboard</h1>
-        <p class="text-[#94a3b8] text-sm mt-1">
-            Resumen de tus finanzas del mes actual
-        </p>
+        <p class="text-[#94a3b8] text-sm mt-1">Resumen de tus finanzas del mes actual</p>
     </div>
 
-    <!-- RESUMEN -->
+    <!-- Tarjetas de resumen -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
 
+        <!-- Balance total -->
         <div class="bg-[#1e293b] rounded-2xl border border-[#334155] p-6">
             <p class="text-[#94a3b8] text-sm mb-1">Balance total</p>
             <p class="text-3xl font-bold text-white"
-               th:text="${'S/ ' + #numbers.formatDecimal(totalBalance, 1, 2)}">
-                S/ 0.00
-            </p>
+               th:text="${'S/ ' + #numbers.formatDecimal(totalBalance, 1, 2)}">S/ 0.00</p>
+            <p class="text-[#94a3b8] text-xs mt-2">Suma de todas tus cuentas</p>
         </div>
 
+        <!-- Ingresos del mes -->
         <div class="bg-[#1e293b] rounded-2xl border border-[#334155] p-6">
-            <p class="text-[#94a3b8] text-sm mb-1">Ingresos</p>
+            <p class="text-[#94a3b8] text-sm mb-1">Ingresos del mes</p>
             <p class="text-3xl font-bold text-green-400"
-               th:text="${'S/ ' + #numbers.formatDecimal(totalIncome, 1, 2)}">
-                S/ 0.00
-            </p>
+               th:text="${'S/ ' + #numbers.formatDecimal(totalIncome, 1, 2)}">S/ 0.00</p>
+            <p class="text-[#94a3b8] text-xs mt-2">Total de ingresos registrados</p>
         </div>
 
+        <!-- Gastos del mes -->
         <div class="bg-[#1e293b] rounded-2xl border border-[#334155] p-6">
-            <p class="text-[#94a3b8] text-sm mb-1">Gastos</p>
+            <p class="text-[#94a3b8] text-sm mb-1">Gastos del mes</p>
             <p class="text-3xl font-bold text-red-400"
-               th:text="${'S/ ' + #numbers.formatDecimal(totalExpense, 1, 2)}">
-                S/ 0.00
-            </p>
+               th:text="${'S/ ' + #numbers.formatDecimal(totalExpense, 1, 2)}">S/ 0.00</p>
+            <p class="text-[#94a3b8] text-xs mt-2">Total de gastos registrados</p>
         </div>
 
     </div>
 
-    <!-- MOVIMIENTOS -->
-    <div class="bg-[#1e293b] rounded-2xl border border-[#334155] p-6">
+    <!-- Contenido principal -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        <h2 class="font-semibold text-white mb-4">
-            Movimientos recientes
-        </h2>
+        <!-- Movimientos recientes -->
+        <div class="lg:col-span-2 bg-[#1e293b] rounded-2xl border border-[#334155] p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="font-semibold text-white">Movimientos recientes</h2>
+                <a th:href="@{/transactions}"
+                   class="text-sm text-blue-400 hover:text-blue-300 transition-colors">Ver todos</a>
+            </div>
 
-        <div th:if="${#lists.isEmpty(recentTransactions)}"
-             class="text-[#94a3b8] text-sm text-center py-6">
-            No hay movimientos
+            <!-- Sin movimientos -->
+            <div th:if="${#lists.isEmpty(recentTransactions)}"
+                 class="text-center py-10 text-[#94a3b8] text-sm">
+                No hay movimientos este mes.
+            </div>
+
+            <!-- Lista -->
+            <div th:unless="${#lists.isEmpty(recentTransactions)}" class="space-y-3">
+                <div th:each="tx : ${recentTransactions}"
+                     class="flex items-center justify-between py-3 border-b border-[#334155] last:border-0">
+                    <div class="flex items-center gap-3">
+                        <div th:classappend="${tx.type.name() == 'INCOME'} ? 'bg-green-900/40 text-green-400' : 'bg-red-900/40 text-red-400'"
+                             class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold">
+                            <span th:text="${tx.type.name() == 'INCOME'} ? '+' : '-'"></span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-white"
+                               th:text="${tx.description != null && !tx.description.isEmpty()} ? ${tx.description} : ${tx.category.name}">
+                            </p>
+                            <p class="text-xs text-[#94a3b8]"
+                               th:text="${#temporals.format(tx.date, 'dd MMM yyyy')}"></p>
+                        </div>
+                    </div>
+                    <span th:classappend="${tx.type.name() == 'INCOME'} ? 'text-green-400' : 'text-red-400'"
+                          class="font-semibold text-sm"
+                          th:text="${(tx.type.name() == 'INCOME' ? '+ ' : '- ') + 'S/ ' + #numbers.formatDecimal(tx.amount, 1, 2)}">
+                    </span>
+                </div>
+            </div>
         </div>
 
-        <div th:each="tx : ${recentTransactions}"
-             class="flex justify-between py-3 border-b border-[#334155] last:border-0">
+        <!-- Panel derecho -->
+        <div class="flex flex-col gap-6">
 
-            <span class="text-white"
-                  th:text="${tx.description}">
-                Movimiento
-            </span>
+            <!-- Cuentas -->
+            <div class="bg-[#1e293b] rounded-2xl border border-[#334155] p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="font-semibold text-white">Mis cuentas</h2>
+                    <a th:href="@{/accounts}"
+                       class="text-sm text-blue-400 hover:text-blue-300 transition-colors">Ver todas</a>
+                </div>
 
-            <span th:classappend="${tx.type.name() == 'INCOME'} ? 'text-green-400' : 'text-red-400'"
-                  th:text="${tx.amount}">
-            </span>
+                <div th:if="${#lists.isEmpty(accounts)}"
+                     class="text-center py-6 text-[#94a3b8] text-sm">
+                    No tienes cuentas registradas.
+                </div>
+
+                <div th:unless="${#lists.isEmpty(accounts)}" class="space-y-3">
+                    <div th:each="acc : ${accounts}"
+                         class="flex items-center justify-between py-2 border-b border-[#334155] last:border-0">
+                        <div>
+                            <p class="text-sm font-medium text-white" th:text="${acc.name}"></p>
+                            <p class="text-xs text-[#94a3b8]" th:text="${acc.type}"></p>
+                        </div>
+                        <span class="text-sm font-semibold text-white"
+                              th:text="${'S/ ' + #numbers.formatDecimal(acc.balance, 1, 2)}"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Presupuestos del mes -->
+            <div class="bg-[#1e293b] rounded-2xl border border-[#334155] p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="font-semibold text-white">Presupuestos</h2>
+                    <a th:href="@{/budgets}"
+                       class="text-sm text-blue-400 hover:text-blue-300 transition-colors">Ver todos</a>
+                </div>
+
+                <div th:if="${#lists.isEmpty(budgets)}"
+                     class="text-center py-6 text-[#94a3b8] text-sm">
+                    No hay presupuestos este mes.
+                </div>
+
+                <div th:unless="${#lists.isEmpty(budgets)}" class="space-y-3">
+                    <div th:each="b : ${budgets}" class="space-y-1">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-white" th:text="${b.category.name}"></span>
+                            <span class="text-[#94a3b8]"
+                                  th:text="${'S/ ' + #numbers.formatDecimal(b.limitAmount, 1, 2)}"></span>
+                        </div>
+                        <div class="w-full bg-[#334155] rounded-full h-1.5">
+                            <div class="bg-blue-500 h-1.5 rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
         </div>
-
     </div>
 
 </div>
-
 </body>
 </html>
