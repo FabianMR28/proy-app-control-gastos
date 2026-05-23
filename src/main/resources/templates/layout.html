@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <title>FinanceApp</title>
+
+    <!-- Tailwind (FUNCIONAL Y SIMPLE) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+
+<body class="bg-[#0f172a] text-[#e2e8f0] min-h-screen font-sans">
+
+<!-- NAVBAR -->
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<!-- ALERTAS -->
+<div th:replace="~{fragments/alerts :: alerts}"></div>
+
+<!-- CONTENIDO DINÁMICO -->
+<main class="max-w-7xl mx-auto px-4 py-8">
+
+    <div layout:fragment="content">
+        <!-- aquí se inyecta cada vista -->
+    </div>
+
+</main>
+
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Admin</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-2xl font-bold">Panel de administración</h1>
+        <p class="text-[#94a3b8] text-sm mt-1">Gestión de usuarios y categorías globales</p>
+    </div>
+
+    <!-- Acciones rápidas -->
+    <div class="flex gap-3 mb-8">
+        <a th:href="@{/admin/categories/new}"
+           class="px-4 py-2 rounded-lg bg-blue-700 hover:bg-blue-600 text-white text-sm font-semibold transition-colors">
+            + Nueva categoría global
+        </a>
+    </div>
+
+    <!-- Tabla de usuarios -->
+    <div class="bg-[#1e293b] rounded-2xl border border-[#334155] overflow-hidden">
+        <div class="px-6 py-4 border-b border-[#334155]">
+            <h2 class="font-semibold text-white">Usuarios registrados</h2>
+            <p class="text-xs text-[#94a3b8] mt-0.5"
+               th:text="${#lists.size(users) + ' usuarios en total'}"></p>
+        </div>
+
+        <div th:if="${#lists.isEmpty(users)}"
+             class="p-12 text-center text-[#94a3b8] text-sm">
+            No hay usuarios registrados.
+        </div>
+
+        <table th:unless="${#lists.isEmpty(users)}" class="w-full text-sm">
+            <thead>
+            <tr class="border-b border-[#334155] text-[#94a3b8]">
+                <th class="text-left px-6 py-4 font-medium">Nombre</th>
+                <th class="text-left px-6 py-4 font-medium">Correo</th>
+                <th class="text-left px-6 py-4 font-medium">Roles</th>
+                <th class="text-left px-6 py-4 font-medium">Estado</th>
+                <th class="text-left px-6 py-4 font-medium">Registro</th>
+                <th class="text-right px-6 py-4 font-medium">Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="u : ${users}"
+                class="border-b border-[#334155] last:border-0 hover:bg-[#334155]/30 transition-colors">
+                <td class="px-6 py-4 font-medium text-white" th:text="${u.name}"></td>
+                <td class="px-6 py-4 text-[#94a3b8]" th:text="${u.email}"></td>
+                <td class="px-6 py-4">
+                    <div class="flex gap-1 flex-wrap">
+                            <span th:each="role : ${u.roles}"
+                                  class="px-2 py-0.5 rounded-full text-xs bg-blue-900/40 text-blue-300 border border-blue-800"
+                                  th:text="${role.name}"></span>
+                    </div>
+                </td>
+                <td class="px-6 py-4">
+                        <span th:if="${u.enabled}"
+                              class="px-2 py-1 rounded-full text-xs bg-green-900/40 text-green-400 border border-green-800">
+                            Activo
+                        </span>
+                    <span th:unless="${u.enabled}"
+                          class="px-2 py-1 rounded-full text-xs bg-red-900/40 text-red-400 border border-red-800">
+                            Inactivo
+                        </span>
+                </td>
+                <td class="px-6 py-4 text-[#94a3b8]"
+                    th:text="${#temporals.format(u.createdAt, 'dd/MM/yyyy')}"></td>
+                <td class="px-6 py-4">
+                    <div class="flex items-center justify-end gap-2">
+                        <form th:action="@{/admin/users/{id}/toggle(id=${u.id})}" method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                            <button type="submit"
+                                    class="px-3 py-1.5 rounded-lg text-[#94a3b8] hover:text-white hover:bg-[#334155] transition-colors">
+                                <span th:text="${u.enabled} ? 'Desactivar' : 'Activar'"></span>
+                            </button>
+                        </form>
+                        <form th:action="@{/admin/users/{id}/delete(id=${u.id})}" method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                            <button type="submit"
+                                    onclick="return confirm('¿Eliminar este usuario? Esta acción no se puede deshacer.')"
+                                    class="px-3 py-1.5 rounded-lg text-red-400 hover:text-white hover:bg-red-900/40 transition-colors">
+                                Eliminar
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+</body>
+</html>

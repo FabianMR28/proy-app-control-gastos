@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Categorías</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-2xl font-bold">Categorías</h1>
+            <p class="text-[#94a3b8] text-sm mt-1">Gestiona tus categorías de ingresos y gastos</p>
+        </div>
+        <a th:href="@{/categories/new}"
+           class="px-4 py-2 rounded-lg bg-blue-700 hover:bg-blue-600 text-white text-sm font-semibold transition-colors">
+            + Nueva categoría
+        </a>
+    </div>
+
+    <!-- Sin categorías -->
+    <div th:if="${#lists.isEmpty(categories)}"
+         class="bg-[#1e293b] rounded-2xl border border-[#334155] p-12 text-center">
+        <p class="text-[#94a3b8] text-sm">No hay categorías registradas.</p>
+        <a th:href="@{/categories/new}"
+           class="inline-block mt-4 px-4 py-2 rounded-lg bg-blue-700 hover:bg-blue-600 text-white text-sm font-semibold transition-colors">
+            Crear primera categoría
+        </a>
+    </div>
+
+    <!-- Tabla -->
+    <div th:unless="${#lists.isEmpty(categories)}"
+         class="bg-[#1e293b] rounded-2xl border border-[#334155] overflow-hidden">
+        <table class="w-full text-sm">
+            <thead>
+            <tr class="border-b border-[#334155] text-[#94a3b8]">
+                <th class="text-left px-6 py-4 font-medium">Nombre</th>
+                <th class="text-left px-6 py-4 font-medium">Tipo</th>
+                <th class="text-left px-6 py-4 font-medium">Origen</th>
+                <th class="text-right px-6 py-4 font-medium">Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="cat : ${categories}"
+                class="border-b border-[#334155] last:border-0 hover:bg-[#334155]/30 transition-colors">
+                <td class="px-6 py-4 font-medium text-white" th:text="${cat.name}"></td>
+                <td class="px-6 py-4">
+                        <span th:classappend="${cat.type.name() == 'INCOME'} ? 'bg-green-900/40 text-green-400 border-green-800' : 'bg-red-900/40 text-red-400 border-red-800'"
+                              class="px-2 py-1 rounded-full text-xs border"
+                              th:text="${cat.type.name() == 'INCOME'} ? 'Ingreso' : 'Gasto'"></span>
+                </td>
+                <td class="px-6 py-4">
+                        <span th:if="${cat.user == null}"
+                              class="px-2 py-1 rounded-full text-xs bg-blue-900/40 text-blue-300 border border-blue-800">
+                            Global
+                        </span>
+                    <span th:unless="${cat.user == null}"
+                          class="px-2 py-1 rounded-full text-xs bg-[#334155] text-[#94a3b8] border border-[#475569]">
+                            Personal
+                        </span>
+                </td>
+                <td class="px-6 py-4">
+                    <div class="flex items-center justify-end gap-2">
+                        <a th:href="@{/categories/{id}/edit(id=${cat.id})}"
+                           class="px-3 py-1.5 rounded-lg text-[#94a3b8] hover:text-white hover:bg-[#334155] transition-colors">
+                            Editar
+                        </a>
+                        <form th:action="@{/categories/{id}/delete(id=${cat.id})}" method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                            <button type="submit"
+                                    onclick="return confirm('¿Eliminar esta categoría?')"
+                                    class="px-3 py-1.5 rounded-lg text-red-400 hover:text-white hover:bg-red-900/40 transition-colors">
+                                Eliminar
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+</body>
+</html>
