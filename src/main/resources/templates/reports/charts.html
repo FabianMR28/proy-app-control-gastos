@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Reportes gráficos</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div class="mb-8">
+        <h1 class="text-2xl font-bold">Reportes gráficos</h1>
+        <p class="text-[#94a3b8] text-sm mt-1">Análisis visual de tus finanzas</p>
+    </div>
+
+    <!-- Fila 1: Pie + Bar mensual -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+
+        <!-- Gastos por categoría -->
+        <div class="bg-[#1e293b] rounded-2xl border border-[#334155] p-6">
+            <h2 class="font-semibold text-white mb-4">Gastos por categoría</h2>
+            <div class="relative h-64">
+                <canvas id="chartExpensesByCategory"></canvas>
+            </div>
+        </div>
+
+        <!-- Ingresos vs Gastos mensual -->
+        <div class="bg-[#1e293b] rounded-2xl border border-[#334155] p-6">
+            <h2 class="font-semibold text-white mb-4">Ingresos vs Gastos (últimos 6 meses)</h2>
+            <div class="relative h-64">
+                <canvas id="chartMonthly"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Fila 2: Presupuesto vs Real + Balance acumulado -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Presupuesto vs Gasto real -->
+        <div class="bg-[#1e293b] rounded-2xl border border-[#334155] p-6">
+            <h2 class="font-semibold text-white mb-4">Presupuesto vs Gasto real (mes actual)</h2>
+            <div class="relative h-64">
+                <canvas id="chartBudget"></canvas>
+            </div>
+            <p id="noBudget" class="hidden text-center text-[#94a3b8] text-sm mt-4">
+                No hay presupuestos configurados para este mes.
+            </p>
+        </div>
+
+        <!-- Balance acumulado -->
+        <div class="bg-[#1e293b] rounded-2xl border border-[#334155] p-6">
+            <h2 class="font-semibold text-white mb-4">Evolución del balance</h2>
+            <div class="relative h-64">
+                <canvas id="chartBalance"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <script th:inline="javascript">
+        const COLORS = [
+            '#3b82f6','#10b981','#f59e0b','#ef4444',
+            '#8b5cf6','#06b6d4','#f97316','#84cc16'
+        ];
+
+        const chartDefaults = {
+            color: '#94a3b8',
+            borderColor: '#334155',
+        };
+
+        // ---- GRÁFICO 1: Gastos por categoría (Doughnut) ----
+        fetch('/reports/charts/data/expenses-by-category')
+            .then(r => r.json())
+            .then(data => {
+                if (!data.length) return;
+                new Chart(document.getElementById('chartExpensesByCategory'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.map(d => d.categoryName),
+                        datasets: [{
+                            data: data.map(d => d.total),
+                            backgroundColor: COLORS.slice(0, data.length),
+                            borderWidth: 0,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { labels: { color: '#94a3b8', boxWidth: 12 } }
+                        }
+                    }
+                });
+            });
+
+        // ---- GRÁFICO 2: Ingresos vs Gastos mensual (Bar) ----
+        fetch('/reports/charts/data/monthly')
+            .then(r => r.json())
+            .then(data => {
+                new Chart(document.getElementById('chartMonthly'), {
+                    type: 'bar',
+                    data: {
+                        labels: data.map(d => d.label),
+                        datasets: [
+                            {
+                                label: 'Ingresos',
+                                data: data.map(d => d.income),
+                                backgroundColor: '#10b98166',
+                                borderColor: '#10b981',
+                                borderWidth: 1,
+                                borderRadius: 4,
+                            },
+                            {
+                                label: 'Gastos',
+                                data: data.map(d => d.expense),
+                                backgroundColor: '#ef444466',
+                                borderColor: '#ef4444',
+                                borderWidth: 1,
+                                borderRadius: 4,
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { labels: { color: '#94a3b8' } }
+                        },
+                        scales: {
+                            x: { ticks: { color: '#94a3b8' }, grid: { color: '#1e293b' } },
+                            y: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }
+                        }
+                    }
+                });
+            });
+
+        // ---- GRÁFICO 3: Presupuesto vs Gasto real (Bar horizontal) ----
+        fetch('/reports/charts/data/budget-vs-actual')
+            .then(r => r.json())
+            .then(data => {
+                if (!data.length) {
+                    document.getElementById('noBudget').classList.remove('hidden');
+                    return;
+                }
+                new Chart(document.getElementById('chartBudget'), {
+                    type: 'bar',
+                    data: {
+                        labels: data.map(d => d.categoryName),
+                        datasets: [
+                            {
+                                label: 'Límite',
+                                data: data.map(d => d.budgetLimit),
+                                backgroundColor: '#3b82f666',
+                                borderColor: '#3b82f6',
+                                borderWidth: 1,
+                                borderRadius: 4,
+                            },
+                            {
+                                label: 'Gastado',
+                                data: data.map(d => d.actualSpent),
+                                backgroundColor: '#f59e0b66',
+                                borderColor: '#f59e0b',
+                                borderWidth: 1,
+                                borderRadius: 4,
+                            }
+                        ]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { labels: { color: '#94a3b8' } }
+                        },
+                        scales: {
+                            x: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } },
+                            y: { ticks: { color: '#94a3b8' }, grid: { color: '#1e293b' } }
+                        }
+                    }
+                });
+            });
+
+        // ---- GRÁFICO 4: Balance acumulado (Line) ----
+        fetch('/reports/charts/data/balance')
+            .then(r => r.json())
+            .then(data => {
+                if (!data.length) return;
+                new Chart(document.getElementById('chartBalance'), {
+                    type: 'line',
+                    data: {
+                        labels: data.map(d => d.date),
+                        datasets: [{
+                            label: 'Balance acumulado',
+                            data: data.map(d => d.balance),
+                            borderColor: '#3b82f6',
+                            backgroundColor: '#3b82f620',
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: 2,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { labels: { color: '#94a3b8' } }
+                        },
+                        scales: {
+                            x: { ticks: { color: '#94a3b8', maxTicksLimit: 8 }, grid: { color: '#334155' } },
+                            y: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }
+                        }
+                    }
+                });
+            });
+    </script>
+
+</div>
+</body>
+</html>
