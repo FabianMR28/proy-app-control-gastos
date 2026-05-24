@@ -30,36 +30,64 @@ public interface TransactionRepository
             LocalDate end
     );
 
-    // TOTAL INGRESOS
+    // TOTAL INGRESOS del usuario
     @Query("""
-    SELECT COALESCE(SUM(t.amount),0)
-    FROM Transaction t
-    WHERE t.category.type =
-    pe.edu.utp.control_gastos_app.enums.CategoryType.INCOME
+        SELECT COALESCE(SUM(t.amount), 0)
+        FROM Transaction t
+        WHERE t.account.user.id = :userId
+          AND t.type = pe.edu.utp.control_gastos_app.enums.CategoryType.INCOME
     """)
-    Double getTotalIncome();
+    Double getTotalIncomeByUser(@Param("userId") Long userId);
 
-    // TOTAL GASTOS
+    // TOTAL GASTOS del usuario
     @Query("""
-    SELECT COALESCE(SUM(t.amount),0)
-    FROM Transaction t
-    WHERE t.category.type =
-    pe.edu.utp.control_gastos_app.enums.CategoryType.EXPENSE
+        SELECT COALESCE(SUM(t.amount), 0)
+        FROM Transaction t
+        WHERE t.account.user.id = :userId
+          AND t.type = pe.edu.utp.control_gastos_app.enums.CategoryType.EXPENSE
     """)
-    Double getTotalExpenses();
+    Double getTotalExpensesByUser(@Param("userId") Long userId);
+
+    // TOTAL INGRESOS del mes actual del usuario
+    @Query("""
+        SELECT COALESCE(SUM(t.amount), 0)
+        FROM Transaction t
+        WHERE t.account.user.id = :userId
+          AND t.type = pe.edu.utp.control_gastos_app.enums.CategoryType.INCOME
+          AND t.date BETWEEN :start AND :end
+    """)
+    Double getTotalIncomeByUserAndPeriod(
+            @Param("userId") Long userId,
+            @Param("start") LocalDate start,
+            @Param("end") LocalDate end
+    );
+
+    // TOTAL GASTOS del mes actual del usuario
+    @Query("""
+        SELECT COALESCE(SUM(t.amount), 0)
+        FROM Transaction t
+        WHERE t.account.user.id = :userId
+          AND t.type = pe.edu.utp.control_gastos_app.enums.CategoryType.EXPENSE
+          AND t.date BETWEEN :start AND :end
+    """)
+    Double getTotalExpensesByUserAndPeriod(
+            @Param("userId") Long userId,
+            @Param("start") LocalDate start,
+            @Param("end") LocalDate end
+    );
 
     // Gastos por categoría del usuario (para pie chart)
     @Query("""
-    SELECT new pe.edu.utp.control_gastos_app.dto.report.CategoryExpenseDTO(
-        t.category.name,
-        CAST(SUM(t.amount) AS double)
-    )
-    FROM Transaction t
-    WHERE t.account.user.id = :userId
-      AND t.type = pe.edu.utp.control_gastos_app.enums.CategoryType.EXPENSE
-    GROUP BY t.category.name
-    ORDER BY SUM(t.amount) DESC
-""")
+        SELECT new pe.edu.utp.control_gastos_app.dto.report.CategoryExpenseDTO(
+            t.category.name,
+            CAST(SUM(t.amount) AS double)
+        )
+        FROM Transaction t
+        WHERE t.account.user.id = :userId
+          AND t.type = pe.edu.utp.control_gastos_app.enums.CategoryType.EXPENSE
+        GROUP BY t.category.name
+        ORDER BY SUM(t.amount) DESC
+    """)
     List<CategoryExpenseDTO> findExpensesByCategory(@Param("userId") Long userId);
 
     // Ingresos y gastos por mes (últimos 6 meses, para bar chart)
