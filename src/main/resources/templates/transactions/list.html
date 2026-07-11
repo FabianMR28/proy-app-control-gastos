@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <title>Movimientos</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h1 class="text-2xl font-bold">Movimientos</h1>
+            <p class="text-[#94a3b8] text-sm mt-1">Historial de ingresos y gastos</p>
+        </div>
+        <a th:href="@{/transactions/new}"
+           class="px-4 py-2 rounded-lg bg-blue-700 hover:bg-blue-600 text-white text-sm font-semibold transition-colors">
+            + Nuevo movimiento
+        </a>
+    </div>
+
+    <!-- Sin movimientos -->
+    <div th:if="${#lists.isEmpty(transactions)}"
+         class="bg-[#1e293b] rounded-2xl border border-[#334155] p-12 text-center">
+        <p class="text-[#94a3b8] text-sm">No hay movimientos registrados.</p>
+        <a th:href="@{/transactions/new}"
+           class="inline-block mt-4 px-4 py-2 rounded-lg bg-blue-700 hover:bg-blue-600 text-white text-sm font-semibold transition-colors">
+            Registrar primer movimiento
+        </a>
+    </div>
+
+    <!-- Tabla -->
+    <div th:unless="${#lists.isEmpty(transactions)}"
+         class="bg-[#1e293b] rounded-2xl border border-[#334155] overflow-hidden">
+        <table class="w-full text-sm">
+            <thead>
+            <tr class="border-b border-[#334155] text-[#94a3b8]">
+                <th class="text-left px-6 py-4 font-medium">Descripción</th>
+                <th class="text-left px-6 py-4 font-medium">Categoría</th>
+                <th class="text-left px-6 py-4 font-medium">Cuenta</th>
+                <th class="text-left px-6 py-4 font-medium">Fecha</th>
+                <th class="text-right px-6 py-4 font-medium">Monto</th>
+                <th class="text-right px-6 py-4 font-medium">Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="tx : ${transactions}"
+                class="border-b border-[#334155] last:border-0 hover:bg-[#334155]/30 transition-colors">
+                <td class="px-6 py-4">
+                    <div class="flex items-center gap-3">
+                        <div th:classappend="${tx.type.name() == 'INCOME'} ? 'bg-green-900/40 text-green-400' : 'bg-red-900/40 text-red-400'"
+                             class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs">
+                            <span th:text="${tx.type.name() == 'INCOME'} ? '+' : '-'"></span>
+                        </div>
+                        <span class="font-medium text-white"
+                              th:text="${tx.description != null && !tx.description.isEmpty()} ? ${tx.description} : '-'"></span>
+                    </div>
+                </td>
+                <td class="px-6 py-4 text-[#94a3b8]" th:text="${tx.category.name}"></td>
+                <td class="px-6 py-4 text-[#94a3b8]" th:text="${tx.account.name}"></td>
+                <td class="px-6 py-4 text-[#94a3b8]"
+                    th:text="${#temporals.format(tx.date, 'dd/MM/yyyy')}"></td>
+                <td class="px-6 py-4 text-right font-semibold"
+                    th:classappend="${tx.type.name() == 'INCOME'} ? 'text-green-400' : 'text-red-400'"
+                    th:text="${(tx.type.name() == 'INCOME' ? '+ ' : '- ') + 'S/ ' + #numbers.formatDecimal(tx.amount, 1, 2)}">
+                </td>
+                <td class="px-6 py-4 text-right">
+                    <form th:action="@{/transactions/{id}/delete(id=${tx.id})}" method="post"
+                          class="inline">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <button type="submit"
+                                onclick="return confirm('¿Eliminar este movimiento?')"
+                                class="px-3 py-1.5 rounded-lg text-red-400 hover:text-white hover:bg-red-900/40 transition-colors">
+                            Eliminar
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+</body>
+</html>
