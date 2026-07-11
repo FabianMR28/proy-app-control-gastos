@@ -2,20 +2,17 @@ FROM gradle:8.14-jdk21 AS build
 
 WORKDIR /app
 
-# Copiar archivos de configuración primero para aprovechar la caché
+COPY gradlew .
+COPY gradle gradle
 COPY build.gradle settings.gradle ./
-COPY gradle ./gradle
 
-# Descargar dependencias
-RUN gradle dependencies --no-daemon
+RUN chmod +x gradlew
 
-# Copiar el código fuente
-COPY src ./src
+COPY src src
 
-# Generar el JAR
-RUN gradle bootJar --no-daemon
+RUN ./gradlew bootJar --no-daemon
 
-# Etapa de ejecución
+
 FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
